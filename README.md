@@ -1,2 +1,1 @@
-# avdeev-alexandr-otus
-homeworks for node js course
+# Домашние работы для курса Node js
