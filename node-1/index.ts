@@ -1,5 +1,4 @@
-function printWords () {
-  return 'Hello world'
-}
+import { FAKE_DATA, printTreeByData } from './printByStructure'
 
-console.log(printWords())
+// Рендер по данным
+console.log(printTreeByData(FAKE_DATA))
