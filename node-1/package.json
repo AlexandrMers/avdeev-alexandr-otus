@@ -6,7 +6,9 @@
   "scripts": {
     "test": "jest",
     "start": "tsc && node dist/index.js",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "print-by-data": "tsc && node dist/printByStructure.js",
+    "tree": "tsc && node dist/fileStructureTree.js"
   },
   "author": "Avdeev Alexandr",
   "license": "ISC",

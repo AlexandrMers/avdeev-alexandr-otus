@@ -1,7 +1,7 @@
-import { FAKE_DATA, printTreeByData } from '../printByStructure'
+import { FAKE_STRUCTURE_DATA, printTreeByData } from '../printByStructure'
 
 const FAKE_DATA_2 = {
-  name: 'root',
+  root: 'root',
   items: [
     {
       name: 'branch 1',
@@ -39,8 +39,7 @@ const FAKE_DATA_2 = {
 }
 
 const FAKE_DATA_3 = {
-
-  name: 'root',
+  root: 'root',
   items: [
     {
       name: 'branch 1',
@@ -114,18 +113,18 @@ const FAKE_DATA_3 = {
 
 describe('check render tree structure', () => {
   it('check data structure variant 1', () => {
-    const expectedStructure = '1\n' +
+    const expectedStructure = '\n' + '1\n' +
         '├── 2\n' +
         '│  ├── 3\n' +
         '│  └── 4\n' +
         '└── 5\n' +
         '    └── 6\n'
 
-    expect(printTreeByData(FAKE_DATA)).toEqual(expectedStructure)
+    expect(printTreeByData(FAKE_STRUCTURE_DATA)).toEqual(expectedStructure)
   })
 
   it('check data structure variant 2', () => {
-    const expectedStructure = 'root\n' +
+    const expectedStructure = '\n' + 'root\n' +
         '├── branch 1\n' +
         '│  └── level 1\n' +
         '│      ├── file1.txt\n' +
@@ -139,7 +138,7 @@ describe('check render tree structure', () => {
   })
 
   it('check data structure variant 3', () => {
-    const expectedStructure = 'root\n' +
+    const expectedStructure = '\n' + 'root\n' +
         '├── branch 1\n' +
         '│  └── level 1\n' +
         '│      ├── file1.txt\n' +

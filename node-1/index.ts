@@ -1,4 +1,4 @@
-import { FAKE_DATA, printTreeByData } from './printByStructure'
+import { FAKE_STRUCTURE_DATA, printTreeByData } from './printByStructure'
 
 // Рендер по данным
-console.log(printTreeByData(FAKE_DATA))
+console.log(printTreeByData(FAKE_STRUCTURE_DATA))

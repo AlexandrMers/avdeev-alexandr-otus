@@ -6,10 +6,11 @@ enum SEPARATORS {
     WITH_SIBILING = '├'
 }
 
+const generateRandomId = () => Math.floor(Math.random() * Date.now())
+
 class Tree {
     private _children = new Map();
-    private _parent;
-    private id = Math.floor(Math.random() * Date.now())
+    private id = generateRandomId()
     name: string | number
     private _deep: number = 0
 
@@ -33,18 +34,9 @@ class Tree {
       return Array.from(this._children.values())
     }
 
-    get parentNode () {
-      return this._parent
-    }
-
-    set parentNode (newParent: Tree) {
-      this._parent = newParent
-    }
-
     createChildNode (name: string | number) {
       const newNode = new Tree(name)
       this._children.set(newNode.identifier, newNode)
-      newNode.parentNode = this
       newNode.deep = this.deep + 1
 
       return newNode
@@ -71,7 +63,7 @@ class Tree {
     }
 
     print () {
-      return `${this.name}\n${this.getTreeString(this)}`
+      return `\n${this.name}\n${this.getTreeString(this)}`
     }
 }
 
