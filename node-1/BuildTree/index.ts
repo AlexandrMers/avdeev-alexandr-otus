@@ -12,7 +12,7 @@ class Tree {
     private _children = new Map();
     private id = generateRandomId()
     name: string | number
-    private _deep: number = 0
+    private _deep: number = 1
 
     constructor (name: string | number) {
       this.name = name
