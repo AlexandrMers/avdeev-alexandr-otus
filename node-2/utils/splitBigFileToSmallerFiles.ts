@@ -1,6 +1,7 @@
 import fs, { createReadStream, WriteStream } from 'fs'
 import path from 'path'
 import { Transform, TransformCallback } from 'stream'
+import { calculateProcess } from './createrFiles'
 
 class StringTransformStream extends Transform {
   _lastPartOfLine: string | null = null;
@@ -53,14 +54,20 @@ export const splitBigFileToSmallerFiles = async (pathToFile: string, countFiles:
   let orderFile = 1
   let currentWriteStream: WriteStream = createOutWritableStream(orderFile)
   let currentFileSize = 0
+  let totalSizeWritten = 0
 
   // 1. Начинаем читать общий поток файла
   readStream.pipe(stream).on('data', (data) => {
+    totalSizeWritten += data.length
+
     // 2. Сработал чанк, нужно создать пишущий стрим и записывать в него чанки,
     // пока размер текущего файла не перевалит отметку "maxSizeOneOfFile"
     if (currentFileSize <= maxSizeOneOfFile) {
       currentWriteStream.write(data, () => {
         currentFileSize += data.length
+
+        const loader = calculateProcess(totalSizeWritten, fileInfo.size, 'Процесс разбиения файлов')
+        process.stdout.write(`\r ${loader}`)
       })
     } else {
       // Как только размер текущего файла достиг максимума

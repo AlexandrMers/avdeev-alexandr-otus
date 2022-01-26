@@ -7,10 +7,10 @@ function randomInteger (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-function calculateProcess (start: number, end: number): string {
+export function calculateProcess (start: number, end: number, prependText: string): string {
   const calculatedProgress = Math.ceil((start / end) * 100)
 
-  return `Процесс создания файла - ${calculatedProgress > 100 ? 100 : calculatedProgress}%`
+  return `${prependText} - ${calculatedProgress > 100 ? 100 : calculatedProgress}%`
 }
 
 export const createWriteStreamFunction = async (pathToFile: string): Promise<boolean> => {
@@ -44,7 +44,7 @@ export const createWriteStreamFunction = async (pathToFile: string): Promise<boo
         }
 
         // Показываем прогресс создания файла
-        const progressText = calculateProcess(threatOfWriteFile.bytesWritten, FILE_SIZE)
+        const progressText = calculateProcess(threatOfWriteFile.bytesWritten, FILE_SIZE, 'Процесс создания файла')
         process.stdout.write(`\r ${progressText}`)
 
         // Чанк записался и мы снова вызываем в рекурсию для записи нового чанка...
