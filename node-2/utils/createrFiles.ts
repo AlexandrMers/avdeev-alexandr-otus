@@ -20,7 +20,7 @@ export const createWriteStreamFunction = async (pathToFile: string): Promise<boo
 
   return new Promise((resolve, reject) => {
     const writeFile = () => {
-      if (threatOfWriteFile.bytesWritten > FILE_SIZE) {
+      if (threatOfWriteFile.bytesWritten >= FILE_SIZE) {
         threatOfWriteFile.end(() => {
           process.stdout.write('\r\n\n')
           console.log('Файл успешно записан...')
@@ -32,7 +32,7 @@ export const createWriteStreamFunction = async (pathToFile: string): Promise<boo
       // Делаем порцию из 100 случайных чисел...
       const STRING_WITH_RANDOM_NUMBERS = Array.from({ length: 100 },
         () => randomInteger(0, 100000)
-      ).join('\n') // TODO - здесь временный разделитель для простоты дебага
+      ).join('\n')
 
       threatOfWriteFile.write(`${STRING_WITH_RANDOM_NUMBERS}\n`, (error) => {
         if (error) {
