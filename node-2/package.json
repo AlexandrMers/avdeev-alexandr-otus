@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "tsc && node dist/index.js",
-    "create-file": "tsc && node dist/index.js",
+    "create-file": "tsc && node --max-old-space-size=50 dist/index.js",
     "lint": "eslint . --ext .ts"
   },
   "author": "Avdeev Alexandr",

@@ -18,9 +18,7 @@ class StringTransformStream extends Transform {
     // вырезаем последний элемент массива из чанка, так как он может быть "разорванным"
     this._lastPartOfLine = lines.splice(lines.length - 1, 1)[0]
 
-    lines.forEach(line => {
-      this.push(line + '\n')
-    })
+    this.push(lines.join('\n'))
     callback()
   }
 
@@ -35,48 +33,79 @@ class StringTransformStream extends Transform {
   }
 }
 
-const createOutWritableStream = (part: number) => {
-  return fs.createWriteStream(path.resolve(`./smallFiles/${part}.txt`), 'utf-8')
+const createPathToFile = (directory: string, orderFile: number) => {
+  const isExistDir = fs.existsSync(path.resolve(`./${directory}`))
+
+  if (!isExistDir) {
+    fs.mkdirSync(path.resolve(`./${directory}`))
+  }
+
+  return path.resolve(`./separatedFiles/${orderFile}.txt`)
+}
+
+const createOutWritableStream = (path: string) => {
+  return fs.createWriteStream(path, 'utf-8')
+}
+
+const showProgress = (total: number, fileInfoSize : number) => {
+  const loader = calculateProcess(total, fileInfoSize, 'Процесс разбиения файлов')
+  process.stdout.write(`\r ${loader}`)
 }
 
 export const splitBigFileToSmallerFiles = async (pathToFile: string, countFiles: number) => {
-  const stream = new StringTransformStream({
+  const transformStream = new StringTransformStream({
     encoding: 'utf-8',
     objectMode: true
   })
 
   const fileInfo = await fs.promises.stat(path.resolve(pathToFile))
-
   const maxSizeOneOfFile = Math.ceil(fileInfo.size / countFiles)
 
-  const readStream = createReadStream(path.resolve(pathToFile), 'utf-8')
+  return new Promise((resolve, reject) => {
+    const readStream = createReadStream(path.resolve(pathToFile), 'utf-8')
 
-  let orderFile = 1
-  let currentWriteStream: WriteStream = createOutWritableStream(orderFile)
-  let currentFileSize = 0
-  let totalSizeWritten = 0
+    let orderFile = 1
+    // Инициализируем первый поток...
 
-  // 1. Начинаем читать общий поток файла
-  readStream.pipe(stream).on('data', (data) => {
-    totalSizeWritten += data.length
+    const pathForCurrentFile = createPathToFile('separatedFiles', orderFile)
+    let currentWriteStream: WriteStream = createOutWritableStream(pathForCurrentFile)
+    let currentFileSize = 0
+    // let totalSizeWritten = 0
 
-    // 2. Сработал чанк, нужно создать пишущий стрим и записывать в него чанки,
-    // пока размер текущего файла не перевалит отметку "maxSizeOneOfFile"
-    if (currentFileSize <= maxSizeOneOfFile) {
-      currentWriteStream.write(data, () => {
-        currentFileSize += data.length
+    // Инициализируем список записанных файлов...
+    const wriitenFiles = [pathForCurrentFile]
 
-        const loader = calculateProcess(totalSizeWritten, fileInfo.size, 'Процесс разбиения файлов')
-        process.stdout.write(`\r ${loader}`)
-      })
-    } else {
-      // Как только размер текущего файла достиг максимума
-      // Завершаем текущий пишущий поток и создаем новый, с новым путем
-      currentWriteStream.end()
-      currentFileSize = 0
-      // Создаём новый пишущий стрим с новым путем (changed orderFile)
-      currentWriteStream = createOutWritableStream(++orderFile)
-      currentWriteStream.write(data)
-    }
+    const isLastWriteStream = orderFile === countFiles
+
+    readStream.on('end', () => {
+      // console.log('\n Разбивка файлов произведена успешно')
+      resolve(wriitenFiles)
+    })
+
+    // 1. Начинаем читать общий поток файла
+    readStream.pipe(transformStream).on('data', (data) => {
+      // totalSizeWritten += data.length
+      // 2. Сработал чанк, нужно создать пишущий стрим и записывать в него чанки,
+      // пока размер текущего файла не перевалит отметку "maxSizeOneOfFile". В случае если файл является последним
+      // в нашем ограничении, тогда записываем в него весь остаток...
+      if (currentFileSize <= maxSizeOneOfFile || isLastWriteStream) {
+        currentWriteStream.write(data, () => {
+          currentFileSize += data.length
+          // showProgress(totalSizeWritten, fileInfo.size)
+        })
+      } else {
+        // Как только размер текущего файла достиг максимума
+        // Завершаем текущий пишущий поток и создаем новый, с новым путем
+        const generatedPath = createPathToFile('separatedFiles', ++orderFile)
+
+        currentWriteStream.end(() => {
+          wriitenFiles.push(path.resolve(generatedPath))
+        })
+        currentFileSize = 0
+        // Создаём новый пишущий стрим с новым путем (changed orderFile)
+        currentWriteStream = createOutWritableStream(generatedPath)
+        currentWriteStream.write(data)
+      }
+    })
   })
 }

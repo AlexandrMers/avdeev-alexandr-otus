@@ -30,7 +30,7 @@ export const createWriteStreamFunction = async (pathToFile: string): Promise<boo
       }
 
       // Делаем порцию из 100 случайных чисел...
-      const STRING_WITH_RANDOM_NUMBERS = Array.from({ length: 100 },
+      const STRING_WITH_RANDOM_NUMBERS = Array.from({ length: 300 },
         () => randomInteger(0, 100000)
       ).join('\n')
 
