@@ -1,5 +1,5 @@
 import { splitBigFileToSmallerFiles } from './utils/splitBigFileToSmallerFiles'
-import { createWriteStreamFunction } from './utils/createrFiles'
+import { createWriteStreamFunction } from './utils/creatorFiles'
 import { sortSmallFiles } from './utils/sortSmallFiles'
 
 const processRun = async () => {

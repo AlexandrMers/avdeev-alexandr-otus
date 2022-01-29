@@ -2,6 +2,7 @@ import fs, { createReadStream, WriteStream } from 'fs'
 import path from 'path'
 import { Transform, TransformCallback } from 'stream'
 import { calculateProcess } from './calculateProcess'
+import { createPathToFile } from './createPathToFile'
 
 class StringTransformStream extends Transform {
   _lastPartOfLine: string | null = null;
@@ -31,16 +32,6 @@ class StringTransformStream extends Transform {
     this._lastPartOfLine = null
     callback()
   }
-}
-
-const createPathToFile = (directory: string, orderFile: number) => {
-  const isExistDir = fs.existsSync(path.resolve(`./${directory}`))
-
-  if (!isExistDir) {
-    fs.mkdirSync(path.resolve(`./${directory}`))
-  }
-
-  return path.resolve(`./separatedFiles/${orderFile}.txt`)
 }
 
 const createOutWritableStream = (path: string) => {
