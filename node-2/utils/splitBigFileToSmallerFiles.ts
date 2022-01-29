@@ -1,7 +1,7 @@
 import fs, { createReadStream, WriteStream } from 'fs'
 import path from 'path'
 import { Transform, TransformCallback } from 'stream'
-import { calculateProcess } from './createrFiles'
+import { calculateProcess } from './calculateProcess'
 
 class StringTransformStream extends Transform {
   _lastPartOfLine: string | null = null;
@@ -52,7 +52,7 @@ const showProgress = (total: number, fileInfoSize : number) => {
   process.stdout.write(`\r ${loader}`)
 }
 
-export const splitBigFileToSmallerFiles = async (pathToFile: string, countFiles: number) => {
+export const splitBigFileToSmallerFiles = async (pathToFile: string, countFiles: number): Promise<string[]> => {
   const transformStream = new StringTransformStream({
     encoding: 'utf-8',
     objectMode: true
@@ -70,28 +70,32 @@ export const splitBigFileToSmallerFiles = async (pathToFile: string, countFiles:
     const pathForCurrentFile = createPathToFile('separatedFiles', orderFile)
     let currentWriteStream: WriteStream = createOutWritableStream(pathForCurrentFile)
     let currentFileSize = 0
-    // let totalSizeWritten = 0
+    let totalSizeWritten = 0
 
     // Инициализируем список записанных файлов...
-    const wriitenFiles = [pathForCurrentFile]
+    const wriitenFiles: string[] = [pathForCurrentFile]
 
     const isLastWriteStream = orderFile === countFiles
 
     readStream.on('end', () => {
-      // console.log('\n Разбивка файлов произведена успешно')
+      console.log('\n Разбивка файлов произведена успешно')
       resolve(wriitenFiles)
+    })
+
+    readStream.on('error', () => {
+      reject(new Error('Произошла ошибка чтения основного потока!'))
     })
 
     // 1. Начинаем читать общий поток файла
     readStream.pipe(transformStream).on('data', (data) => {
-      // totalSizeWritten += data.length
+      totalSizeWritten += data.length
       // 2. Сработал чанк, нужно создать пишущий стрим и записывать в него чанки,
       // пока размер текущего файла не перевалит отметку "maxSizeOneOfFile". В случае если файл является последним
       // в нашем ограничении, тогда записываем в него весь остаток...
       if (currentFileSize <= maxSizeOneOfFile || isLastWriteStream) {
         currentWriteStream.write(data, () => {
           currentFileSize += data.length
-          // showProgress(totalSizeWritten, fileInfo.size)
+          showProgress(totalSizeWritten, fileInfo.size)
         })
       } else {
         // Как только размер текущего файла достиг максимума
@@ -99,7 +103,7 @@ export const splitBigFileToSmallerFiles = async (pathToFile: string, countFiles:
         const generatedPath = createPathToFile('separatedFiles', ++orderFile)
 
         currentWriteStream.end(() => {
-          wriitenFiles.push(path.resolve(generatedPath))
+          wriitenFiles.push(generatedPath)
         })
         currentFileSize = 0
         // Создаём новый пишущий стрим с новым путем (changed orderFile)

@@ -1,16 +1,13 @@
 import fs from 'fs'
 import path from 'path'
 
+import { calculateProcess } from './calculateProcess'
+
+// Переводим значение в мб
 const FILE_SIZE = 1024 * 1024 * 100
 
 function randomInteger (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-export function calculateProcess (start: number, end: number, prependText: string): string {
-  const calculatedProgress = Math.ceil((start / end) * 100)
-
-  return `${prependText} - ${calculatedProgress > 100 ? 100 : calculatedProgress}%`
 }
 
 export const createWriteStreamFunction = async (pathToFile: string): Promise<boolean> => {
