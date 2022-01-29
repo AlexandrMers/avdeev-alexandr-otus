@@ -1,4 +1,4 @@
-import fs, { writeFileSync } from 'fs'
+import fs from 'fs'
 import path from 'path'
 import { sortMergeFunc } from './sortWithMerging'
 
@@ -13,13 +13,11 @@ export const sortSmallFiles = async (directories: string[]) => {
 async function * asyncPromiseGenerator (directories: string[]) {
   let count = 1
   for (const url of directories) {
-    console.log('run here !!!')
-    const sortedFile = fs.readFileSync(url, { encoding: 'utf-8' })
+    const sortedFile = await fs.promises.readFile(url, { encoding: 'utf-8' })
     const arrayOfNumbers = sortedFile.split('\n')
     const sortedNumbers = sortMergeFunc(arrayOfNumbers)
     const joinedString = sortedNumbers.join('\n')
 
-    writeFileSync(path.resolve(`./sortedFiles/${count++}.txt`), joinedString, 'utf-8')
-    yield
+    yield await fs.promises.writeFile(path.resolve(`./sortedFiles/${count++}.txt`), joinedString, 'utf-8')
   }
 }
